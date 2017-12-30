@@ -1,5 +1,7 @@
 # SoundCloud Follower Maze Code Submission
 
+Problem description can be found [here](package/instructions.md).
+
 ## Requirements
 
 This solution was implemented using Java 8. It requires an *Oracle JDK version 1.8* or higher. It will not work with previous JDKs. It was not tested on Open JDK.
