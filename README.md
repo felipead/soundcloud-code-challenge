@@ -40,4 +40,6 @@ If I had more time I would try to do the following:
 
 - Run the server in a container (eg: [Docker](https://www.docker.com)). Orchestrate possible dependencies (eg: Redis, RabbitMQ) using [docker-compose](https://docs.docker.com/compose/) or a similar tool.
 
+- Improve logging and monitoring. Add a health status check. Collect logs using a proper log store.
+
 - Write documentation describing the high-level architecture. Right now, there's none. Sorry about that folks!
