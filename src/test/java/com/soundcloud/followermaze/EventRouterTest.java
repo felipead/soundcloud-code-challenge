@@ -2,12 +2,10 @@ package com.soundcloud.followermaze;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,7 +14,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.*;
 
@@ -253,30 +250,6 @@ public class EventRouterTest {
 
         assertSentTo(bogus, broadcast);
         others.forEach(i -> assertSentTo(i, broadcast));
-    }
-
-    @Test
-    public void routeCollectionOfEventsOrderedBySequenceNumberInIncreasingOrder() throws IOException {
-        final long sequenceStart = 9999999999L;
-        final int numberOfEvents = 10000;
-
-        Client client = buildClient(1L);
-        router.register(client);
-
-        List<Event> events = LongStream.range(sequenceStart, sequenceStart + numberOfEvents)
-                .mapToObj(Event::newBroadcast)
-                .collect(Collectors.toList());
-
-        Collections.shuffle(events);
-        router.route(events);
-
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(client, times(numberOfEvents)).send(eventCaptor.capture());
-
-        List<Event> routedEvents = eventCaptor.getAllValues();
-        for (int i = 0; i < numberOfEvents; i++) {
-            assertThat(routedEvents.get(i).getSequence(), is(sequenceStart + i));
-        }
     }
 
     @Test

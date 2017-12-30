@@ -1,7 +1,10 @@
 package com.soundcloud.followermaze;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EventRouter {
@@ -34,10 +37,6 @@ public class EventRouter {
                 sendToFollowers(event.getFromId(), event);
                 break;
         }
-    }
-
-    public void route(Collection<Event> events) {
-        events.stream().sorted().forEach(this::route);
     }
 
     protected Client getClient(Long id) {

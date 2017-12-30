@@ -1,28 +1,27 @@
 package com.soundcloud.followermaze;
 
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.lang.System.currentTimeMillis;
 
 public class EventProcessor implements Runnable {
 
-    private static final int DEFAULT_ROUTING_WINDOW = 10240;
-    private static final int DEFAULT_QUEUE_CAPACITY = DEFAULT_ROUTING_WINDOW * 2;
-
     private final EventRouter router;
     private final BlockingQueue<Event> queue;
-    private final int routingWindow;
+    private final int batchSize;
+    private final long timeoutMilliseconds;
 
     EventProcessor(EventRouter router) {
-        this(router, DEFAULT_QUEUE_CAPACITY, DEFAULT_ROUTING_WINDOW);
+        this(router, 20480, 10240, 5000);
     }
 
-    EventProcessor(EventRouter router, int queueCapacity, int routingWindow) {
+    EventProcessor(EventRouter router, int queueSize, int batchSize, long timeoutMilliseconds) {
         this.router = router;
-        this.queue = new PriorityBlockingQueue<>(queueCapacity);
-        this.routingWindow = routingWindow;
+        this.queue = new PriorityBlockingQueue<>(queueSize);
+        this.batchSize = batchSize;
+        this.timeoutMilliseconds = timeoutMilliseconds;
     }
 
     public void submit(Event event) {
@@ -31,13 +30,31 @@ public class EventProcessor implements Runnable {
 
     @Override
     public void run() {
+        long lastDispatch = currentTimeMillis();
         while (true) {
-            if (queue.size() >= routingWindow) {
-                List<Event> events = IntStream.range(0, routingWindow)
-                        .mapToObj(i -> queue.remove())
-                        .collect(Collectors.toList());
-                router.route(events);
+            if (queue.size() >= batchSize) {
+                dispatchBatch();
+                lastDispatch = currentTimeMillis();
+            }
+            else if (timeoutExpiredSince(lastDispatch)) {
+                dispatchRemaining();
+                lastDispatch = currentTimeMillis();
             }
         }
+    }
+
+    private void dispatchRemaining() {
+        while (!queue.isEmpty()) {
+            router.route(queue.remove());
+        }
+    }
+
+    private void dispatchBatch() {
+        IntStream.range(0, batchSize)
+                .forEach(i -> router.route(queue.remove()));
+    }
+
+    private boolean timeoutExpiredSince(long lastDispatch) {
+        return (currentTimeMillis() - lastDispatch) >= timeoutMilliseconds;
     }
 }
