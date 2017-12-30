@@ -3,10 +3,14 @@ package com.soundcloud.followermaze;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import static com.soundcloud.followermaze.SocketUtils.bufferedReaderFrom;
 
 class EventListener implements Runnable {
+
+    private final static Logger auditLogger = Logger.getLogger("audit");
+    private final static Logger errorLogger = Logger.getLogger("errors");
 
     private final Socket connection;
     private final EventProcessor processor;
@@ -22,13 +26,12 @@ class EventListener implements Runnable {
             BufferedReader in = bufferedReaderFrom(connection);
             String payload;
             while ((payload = in.readLine()) != null) {
-                // TODO: log that event was received (info-level at audit log)
-                System.out.println(payload);
+                auditLogger.info("Received event: " + payload);
                 Event event = Event.fromPayload(payload);
                 processor.submit(event);
             }
-        } catch (IOException ignored) {
-            // TODO: log this occurrence (error-level)
+        } catch (IOException e) {
+            errorLogger.warning("I/O error while receiving event: " + e.getMessage());
         }
     }
 }

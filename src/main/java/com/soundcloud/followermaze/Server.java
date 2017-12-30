@@ -5,10 +5,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public class Server {
 
-    private static final int CLIENT_LISTENER_THREADS = 100;
+    private final static int CLIENT_LISTENER_THREADS = 100;
+
+    private final static Logger auditLogger = Logger.getLogger("audit");
 
     private final int clientPort;
     private final int eventSourcePort;
@@ -36,6 +39,7 @@ public class Server {
     }
 
     private void acceptEventSourceConnection() throws IOException {
+        auditLogger.info("Listening event source connection on port " + eventSourcePort);
         try (ServerSocket server = new ServerSocket(eventSourcePort)) {
             Socket connection = server.accept();
             eventListenerWorker.submit(new EventListener(connection, eventProcessor));
@@ -43,6 +47,7 @@ public class Server {
     }
 
     private void acceptClientConnections() throws IOException {
+        auditLogger.info("Listening client connections on port " + clientPort);
         try (ServerSocket server = new ServerSocket(this.clientPort)) {
             while (true) {
                 Socket connection = server.accept();

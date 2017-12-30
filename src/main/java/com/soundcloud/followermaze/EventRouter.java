@@ -6,10 +6,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public class EventRouter {
 
-    private static int INITIAL_CLIENT_CAPACITY = 100;
+    private final static int INITIAL_CLIENT_CAPACITY = 100;
+
+    private final static Logger auditLogger = Logger.getLogger("audit");
+    private final static Logger errorLogger = Logger.getLogger("errors");
 
     private final Map<Long, Client> clients = new ConcurrentHashMap<>(INITIAL_CLIENT_CAPACITY);
     private final Map<Long, Set<Long>> followers = new HashMap<>();
@@ -70,10 +74,12 @@ public class EventRouter {
     }
 
     private void send(Client recipient, Event event) {
+        Long id = recipient.getId();
         try {
+            auditLogger.info(String.format("Forwarding to client %d event: %s", id, event.toPayload()));
             recipient.send(event);
-        } catch (IOException ignored) {
-            // TODO: log an IOException happened while trying to send event to error log
+        } catch (IOException e) {
+            errorLogger.warning(String.format("I/O error while forwarding event to client %d: %s", id, e.getMessage()));
         }
     }
 }

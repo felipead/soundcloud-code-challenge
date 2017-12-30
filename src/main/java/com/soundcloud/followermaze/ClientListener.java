@@ -3,10 +3,14 @@ package com.soundcloud.followermaze;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import static com.soundcloud.followermaze.SocketUtils.bufferedReaderFrom;
 
 class ClientListener implements Runnable {
+
+    private final static Logger auditLogger = Logger.getLogger("audit");
+    private final static Logger errorLogger = Logger.getLogger("error");
 
     private final Socket connection;
     private final EventRouter eventRouter;
@@ -22,18 +26,17 @@ class ClientListener implements Runnable {
             BufferedReader in = bufferedReaderFrom(connection);
             String line = in.readLine();
             if (line == null) {
-                // Socket disconnected
+                auditLogger.info("Client disconnected prematurely before sending its id");
                 return;
             }
             registerClient(Long.parseLong(line));
-        } catch (IOException ignore) {
-            // TODO: log this occurrence (error-level)
+        } catch (IOException e) {
+            errorLogger.warning("I/O error while accepting client connection: " + e.getMessage());
         }
     }
 
     private void registerClient(Long id) {
-        // TODO: write informative logs instead
-        System.out.println(String.format("Client %d accepted.", id));
+        auditLogger.info("Registered client with id: " + id);
         eventRouter.register(new Client(id, connection));
     }
 }
