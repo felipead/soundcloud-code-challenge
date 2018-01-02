@@ -7,7 +7,7 @@ import java.util.stream.LongStream;
 
 final class TestFixtures {
 
-    static Event buildEvent(long sequence) {
+    private static Event buildAssortedEvent(long sequence) {
         int type = new Long(sequence % 5).intValue();
         switch (type) {
             case 0: return Event.newFollow(sequence, 50L, 60L);
@@ -24,7 +24,7 @@ final class TestFixtures {
 
     static List<Event> buildEvents(long numberOfEvents, long baseSequence) {
         return LongStream.range(baseSequence, baseSequence + numberOfEvents)
-                .mapToObj(TestFixtures::buildEvent)
+                .mapToObj(TestFixtures::buildAssortedEvent)
                 .collect(Collectors.toList());
     }
 

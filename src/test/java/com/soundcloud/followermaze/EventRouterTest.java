@@ -63,7 +63,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeFollowEventWhenFolloweeExists() {
+    public void routesFollowEventWhenFolloweeExists() {
         Client follower = buildClient(60L);
         Client followee = buildClient(50L);
         List<Client> others = buildClients(1L, 10L);
@@ -80,7 +80,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeFollowEventWhenFolloweeDoesNotExist() {
+    public void routesFollowEventWhenFolloweeDoesNotExist() {
         Client follower = buildClient(60L);
         router.register(follower);
 
@@ -90,7 +90,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeUnfollowEventWhenFolloweeExists() {
+    public void routesUnfollowEventWhenFolloweeExists() {
         Client follower = buildClient(60L);
         Client followee = buildClient(50L);
         List<Client> others = buildClients(1L, 10L);
@@ -108,7 +108,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeUnfollowEventWhenFolloweeDoesNotExist() {
+    public void routesUnfollowEventWhenFolloweeDoesNotExist() {
         Client follower = buildClient(60L);
         router.register(follower);
 
@@ -119,7 +119,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeBroadcastEvent() {
+    public void routesBroadcastEvent() {
         List<Client> clients = buildClients(1L, 10L);
         clients.forEach(router::register);
 
@@ -130,7 +130,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routePrivateMessageEventWhenRecipientExists() {
+    public void routesPrivateMessageEventWhenRecipientExists() {
         Client sender = buildClient(60L);
         Client recipient = buildClient(50L);
         List<Client> others = buildClients(1L, 10L);
@@ -147,7 +147,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routePrivateMessageEventWhenRecipientDoesNotExist() {
+    public void routesPrivateMessageEventWhenRecipientDoesNotExist() {
         Client sender = buildClient(60L);
         router.register(sender);
 
@@ -157,7 +157,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeStatusUpdateWhenThereAreFollowers() {
+    public void routesStatusUpdateWhenThereAreFollowers() {
         Client followee = buildClient(60L);
         Client other = buildClient(61L);
 
@@ -184,7 +184,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeStatusUpdateWhenThereAreNoFollowers() {
+    public void routesStatusUpdateWhenThereAreNoFollowers() {
         Client followee = buildClient(60L);
         List<Client> others = buildClients(1L, 10L);
 
@@ -199,7 +199,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeStatusUpdateWhenThereAreUnfollowers() {
+    public void routesStatusUpdateWhenThereAreUnfollowers() {
         Client followee = buildClient(60L);
 
         List<Client> followers = buildClients(1L, 10L);
@@ -228,7 +228,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeStatusUpdateWhenFollowerDoesNotExist() {
+    public void routesStatusUpdateWhenFollowerDoesNotExist() {
         Client followee = buildClient(60L);
         router.register(followee);
         router.route(Event.newFollow(sequence.getAndIncrement(), 99999L, followee.getId()));
@@ -238,7 +238,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void routeEventIgnoringSocketExceptions() {
+    public void routesEventIgnoringSocketExceptions() {
         Client bogus = spy(new Client(1L, bogusSocket()));
         List<Client> others = buildClients(10L, 20L);
 
@@ -253,7 +253,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void registerClientWithConcurrentThreads() throws InterruptedException, ExecutionException {
+    public void registersClientWithConcurrentThreads() throws InterruptedException, ExecutionException {
         final int numberOfThreads = 100;
         final int numberOfClients = 100000;
 

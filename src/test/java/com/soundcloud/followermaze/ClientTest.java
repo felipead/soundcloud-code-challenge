@@ -14,7 +14,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class ClientTest extends AbstractSocketServerTest {
 
     @Test
-    public void sendOneEvent() throws IOException {
+    public void sendsOneEvent() throws IOException {
         final String payload = "666|F|60|50";
         Client client = new Client(666L, clientConnection);
         client.send(Event.fromPayload(payload));
@@ -24,7 +24,7 @@ public class ClientTest extends AbstractSocketServerTest {
     }
 
     @Test
-    public void sendSeveralEvents() throws IOException {
+    public void sendsSeveralEvents() throws IOException {
         final int numberOfEvents = 10000;
         final List<Event> events = buildEvents(numberOfEvents);
 

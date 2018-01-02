@@ -16,24 +16,24 @@ public class Event implements Comparable<Event> {
         this.toId = toId;
     }
 
-    public static Event newFollow(long sequence, long fromUserId, long toUserId) {
-        return new Event(sequence, EventType.FOLLOW, fromUserId, toUserId);
+    public static Event newFollow(long sequence, long fromId, long toId) {
+        return new Event(sequence, EventType.FOLLOW, fromId, toId);
     }
 
-    public static Event newUnfollow(long sequence, long fromUserId, long toUserId) {
-        return new Event(sequence, EventType.UNFOLLOW, fromUserId, toUserId);
+    public static Event newUnfollow(long sequence, long fromId, long toId) {
+        return new Event(sequence, EventType.UNFOLLOW, fromId, toId);
     }
 
     public static Event newBroadcast(long sequence) {
         return new Event(sequence, EventType.BROADCAST, null, null);
     }
 
-    public static Event newPrivateMessage(long sequence, long fromUserId, long toUserId) {
-        return new Event(sequence, EventType.PRIVATE_MESSAGE, fromUserId, toUserId);
+    public static Event newPrivateMessage(long sequence, long fromId, long toId) {
+        return new Event(sequence, EventType.PRIVATE_MESSAGE, fromId, toId);
     }
 
-    public static Event newStatusUpdate(long sequence, long fromUserId) {
-        return new Event(sequence, EventType.STATUS_UPDATE, fromUserId, null);
+    public static Event newStatusUpdate(long sequence, long fromId) {
+        return new Event(sequence, EventType.STATUS_UPDATE, fromId, null);
     }
 
     public static Event fromPayload(String payload) {

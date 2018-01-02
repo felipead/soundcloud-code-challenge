@@ -38,7 +38,7 @@ public class EventProcessorTest {
     }
 
     @Test
-    public void doNotDispatchEventsIfBatchIsNotFilledAndTimeoutIsNotExpired() throws Exception {
+    public void doesNotDispatchEventsIfBatchIsNotFilledAndTimeoutIsNotExpired() throws Exception {
         final EventProcessor processor = new EventProcessor(router, BATCH_SIZE, Long.MAX_VALUE);
 
         executor.submit(processor);
@@ -49,7 +49,7 @@ public class EventProcessorTest {
     }
 
     @Test
-    public void dispatchEventsInOrderIfBatchIsFilled() throws Exception {
+    public void dispatchesEventsInOrderIfBatchIsFilled() throws Exception {
         final EventProcessor processor = new EventProcessor(router, BATCH_SIZE, Long.MAX_VALUE);
 
         executor.submit(processor);
@@ -68,7 +68,7 @@ public class EventProcessorTest {
     }
 
     @Test
-    public void dispatchEventsInOrderIfBatchIsExceededAndKeepRemainingEventsInQueue() throws Exception {
+    public void dispatchesEventsInOrderIfBatchIsExceededAndKeepRemainingEventsInQueue() throws Exception {
         final EventProcessor processor = new EventProcessor(router, BATCH_SIZE, Long.MAX_VALUE);
 
         executor.submit(processor);
@@ -87,7 +87,7 @@ public class EventProcessorTest {
     }
 
     @Test
-    public void dispatchEventsInOrderIfTimeoutExpiredAndBatchIsNotFilled() throws Exception {
+    public void dispatchesEventsInOrderIfTimeoutExpiredAndBatchIsNotFilled() throws Exception {
         final long batchTimeout = 5000;
         final int numberOfEvents = BATCH_SIZE - 1;
         final EventProcessor processor = new EventProcessor(router, BATCH_SIZE, batchTimeout);
@@ -108,7 +108,7 @@ public class EventProcessorTest {
     }
 
     @Test
-    public void dispatchAllEventsEventually() throws Exception {
+    public void dispatchesAllEventsEventually() throws Exception {
         final long batchTimeout = 5000;
         final int excessSize = 100;
         final int numberOfEvents = BATCH_SIZE * 2 + excessSize;
