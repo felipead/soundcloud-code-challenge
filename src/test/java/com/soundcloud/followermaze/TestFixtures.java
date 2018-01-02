@@ -1,5 +1,6 @@
 package com.soundcloud.followermaze;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -18,8 +19,22 @@ final class TestFixtures {
     }
 
     static List<Event> buildEvents(long numberOfEvents) {
-        return LongStream.range(1, numberOfEvents + 1)
+        return buildEvents(numberOfEvents, 1L);
+    }
+
+    static List<Event> buildEvents(long numberOfEvents, long baseSequence) {
+        return LongStream.range(baseSequence, baseSequence + numberOfEvents)
                 .mapToObj(TestFixtures::buildEvent)
                 .collect(Collectors.toList());
+    }
+
+    static List<Event> buildShuffledEvents(long numberOfEvents) {
+        return buildShuffledEvents(numberOfEvents, 1L);
+    }
+
+    static List<Event> buildShuffledEvents(long numberOfEvents, long baseSequence) {
+        List<Event> events = buildEvents(numberOfEvents, baseSequence);
+        Collections.shuffle(events);
+        return events;
     }
 }

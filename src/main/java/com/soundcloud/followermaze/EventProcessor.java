@@ -1,60 +1,56 @@
 package com.soundcloud.followermaze;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.stream.IntStream;
-
-import static java.lang.System.currentTimeMillis;
 
 public class EventProcessor implements Runnable {
 
     private final EventRouter router;
-    private final BlockingQueue<Event> queue;
+
+    // A thread-safe queue that stores comparable elements and retrieves then in order.
+    private final PriorityBlockingQueue<Event> queue;
+
     private final int batchSize;
-    private final long timeoutMilliseconds;
+    private final long batchTimeout;
+    private final Object dispatchMonitor;
 
     EventProcessor(EventRouter router) {
-        this(router, 20480, 10240, 5000);
+        this(router, 8192, 5000);
     }
 
-    EventProcessor(EventRouter router, int queueSize, int batchSize, long timeoutMilliseconds) {
+    EventProcessor(EventRouter router, int batchSize, long batchTimeout) {
         this.router = router;
-        this.queue = new PriorityBlockingQueue<>(queueSize);
+        this.queue = new PriorityBlockingQueue<>(batchSize * 2);
         this.batchSize = batchSize;
-        this.timeoutMilliseconds = timeoutMilliseconds;
+        this.batchTimeout = batchTimeout;
+        this.dispatchMonitor = new Object();
     }
 
     public void submit(Event event) {
         queue.add(event);
+        if (queue.size() >= batchSize) {
+            synchronized (dispatchMonitor) {
+                dispatchMonitor.notifyAll();
+            }
+        }
     }
 
     @Override
     public void run() {
-        long lastDispatch = currentTimeMillis();
         while (true) {
-            if (queue.size() >= batchSize) {
+            try {
+                synchronized (dispatchMonitor) {
+                    dispatchMonitor.wait(batchTimeout);
+                }
                 dispatchBatch();
-                lastDispatch = currentTimeMillis();
-            }
-            else if (timeoutExpiredSince(lastDispatch)) {
-                dispatchRemaining();
-                lastDispatch = currentTimeMillis();
-            }
-        }
-    }
-
-    private void dispatchRemaining() {
-        while (!queue.isEmpty()) {
-            router.route(queue.remove());
+            } catch (InterruptedException ignored) { }
         }
     }
 
     private void dispatchBatch() {
-        IntStream.range(0, batchSize)
-                .forEach(i -> router.route(queue.remove()));
-    }
-
-    private boolean timeoutExpiredSince(long lastDispatch) {
-        return (currentTimeMillis() - lastDispatch) >= timeoutMilliseconds;
+        for (int i = 0; i < batchSize; i++) {
+            Event e = queue.poll();
+            if (e == null) break;
+            router.route(e);
+        }
     }
 }
