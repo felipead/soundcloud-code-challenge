@@ -15,7 +15,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ClientListenerTest extends AbstractSocketServerTest {
+public class ClientHandshakeTest extends AbstractSocketServerTest {
 
     private EventRouter eventRouter;
 
@@ -29,7 +29,7 @@ public class ClientListenerTest extends AbstractSocketServerTest {
         final Long id = 12345L;
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future promise = executor.submit(new ClientListener(clientConnection, eventRouter));
+        Future promise = executor.submit(new ClientHandshake(clientConnection, eventRouter));
 
         Writer out = bufferedWriterFrom(serverConnection);
         out.write(id.toString());
@@ -47,7 +47,7 @@ public class ClientListenerTest extends AbstractSocketServerTest {
     @Test
     public void clientDisconnectsPrematurely() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future promise = executor.submit(new ClientListener(clientConnection, eventRouter));
+        Future promise = executor.submit(new ClientHandshake(clientConnection, eventRouter));
 
         serverConnection.close();
         promise.get();

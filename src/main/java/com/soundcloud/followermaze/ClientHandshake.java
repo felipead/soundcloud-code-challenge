@@ -7,7 +7,16 @@ import java.util.logging.Logger;
 
 import static com.soundcloud.followermaze.SocketUtils.bufferedReaderFrom;
 
-class ClientListener implements Runnable {
+/**
+ * This class is responsible for handshaking clients. It receives
+ * a TCP connection that was just established with a client, performs
+ * the protocol handshake and registers the client with an instance of
+ * {@link EventRouter}.
+ *
+ * The handshake is as follows: the client connects, sends its
+ * numeric ID as plain-text, followed by CRLF.
+ */
+class ClientHandshake implements Runnable {
 
     private final static Logger auditLogger = Logger.getLogger("audit");
     private final static Logger errorLogger = Logger.getLogger("error");
@@ -15,7 +24,7 @@ class ClientListener implements Runnable {
     private final Socket connection;
     private final EventRouter eventRouter;
 
-    ClientListener(Socket connection, EventRouter eventRouter) {
+    ClientHandshake(Socket connection, EventRouter eventRouter) {
         this.connection = connection;
         this.eventRouter = eventRouter;
     }
@@ -31,7 +40,7 @@ class ClientListener implements Runnable {
             }
             registerClient(Long.parseLong(line));
         } catch (IOException e) {
-            errorLogger.warning("I/O error while accepting client connection: " + e.getMessage());
+            errorLogger.warning("I/O error while registering client: " + e.getMessage());
         }
     }
 

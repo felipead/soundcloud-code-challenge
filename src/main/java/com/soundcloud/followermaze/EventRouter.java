@@ -8,6 +8,22 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+/**
+ * The event router has the following responsibilities:
+ *
+ * <ul>
+ *     <li>Registers clients. Clients can be safely registered from multiple concurrent threads.</li>
+ *     <li>Receives, interprets and route events to clients (if needed).</li>
+ *     <li>Stores the follow/unfollow status for each client.</li>
+ * </ul>
+ *
+ * The event router is a finite-state machine and its state constantly changes as events are processed.
+ *
+ * Please note that although multiple threads can register clients, only one thread can route events
+ * at the moment. If we need multiple threads to be able to route events concurrently, this can be
+ * easily achieved by using a ConcurrentHashMap and a CopyOnWriteArraySet to store the follow/unfollow
+ * status in a thread-safe manner.
+ */
 public class EventRouter {
 
     private final static int INITIAL_CLIENT_CAPACITY = 100;
@@ -42,6 +58,11 @@ public class EventRouter {
                 break;
         }
     }
+
+
+    //
+    // FIXME: this method was only exposed for testing purposes.
+    //
 
     protected Client getClient(Long id) {
         return clients.get(id);

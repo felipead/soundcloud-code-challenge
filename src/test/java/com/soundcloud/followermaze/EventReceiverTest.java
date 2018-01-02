@@ -16,21 +16,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 
-public class EventListenerTest extends AbstractSocketServerTest {
+public class EventReceiverTest extends AbstractSocketServerTest {
 
-    private EventProcessor eventProcessor;
+    private EventDispatcher eventDispatcher;
 
     @Before
     public void setup() {
-        eventProcessor = mock(EventProcessor.class);
+        eventDispatcher = mock(EventDispatcher.class);
     }
 
     @Test
-    public void forwardsOneEventToProcessor() throws Exception {
+    public void forwardsOneEventToDispatcher() throws Exception {
         final String payload = "666|F|60|50";
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future promise = executor.submit(new EventListener(clientConnection, eventProcessor));
+        Future promise = executor.submit(new EventReceiver(clientConnection, eventDispatcher));
 
         Writer out = bufferedWriterFrom(serverConnection);
         out.write(payload);
@@ -41,18 +41,18 @@ public class EventListenerTest extends AbstractSocketServerTest {
         promise.get();
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventProcessor).submit(eventCaptor.capture());
+        verify(eventDispatcher).submit(eventCaptor.capture());
         Event event = eventCaptor.getValue();
         assertThat(event.toPayload(), is(payload));
     }
 
     @Test
-    public void forwardsSeveralEventsToProcessorOneByOne() throws Exception {
+    public void forwardsSeveralEventsToDispatcherOneByOne() throws Exception {
         final int numberOfEvents = 100000;
         final List<Event> events = buildEvents(numberOfEvents);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future promise = executor.submit(new EventListener(clientConnection, eventProcessor));
+        Future promise = executor.submit(new EventReceiver(clientConnection, eventDispatcher));
 
         Writer out = bufferedWriterFrom(serverConnection);
         for (Event event : events) {
@@ -65,7 +65,7 @@ public class EventListenerTest extends AbstractSocketServerTest {
         promise.get();
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventProcessor, times(numberOfEvents)).submit(eventCaptor.capture());
+        verify(eventDispatcher, times(numberOfEvents)).submit(eventCaptor.capture());
 
         List<Event> sentEvents = eventCaptor.getAllValues();
         for (int i = 0; i < numberOfEvents; i++) {

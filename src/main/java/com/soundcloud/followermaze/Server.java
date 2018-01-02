@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 public class Server {
 
-    private final static int CLIENT_LISTENER_THREADS = 100;
+    private final static int CLIENT_HANDSHAKE_THREADS = 100;
 
     private final static Logger auditLogger = Logger.getLogger("audit");
 
@@ -17,11 +17,11 @@ public class Server {
     private final int eventSourcePort;
 
     private final EventRouter eventRouter = new EventRouter();
-    private final EventProcessor eventProcessor = new EventProcessor(eventRouter);
+    private final EventDispatcher eventDispatcher = new EventDispatcher(eventRouter);
 
-    private ExecutorService eventProcessorWorker = Executors.newSingleThreadExecutor();
-    private ExecutorService eventListenerWorker = Executors.newSingleThreadExecutor();
-    private ExecutorService clientListenerWorker = Executors.newFixedThreadPool(CLIENT_LISTENER_THREADS);
+    private ExecutorService eventDispatcherWorker = Executors.newSingleThreadExecutor();
+    private ExecutorService eventReceiverWorker = Executors.newSingleThreadExecutor();
+    private ExecutorService clientHandshakeWorker = Executors.newFixedThreadPool(CLIENT_HANDSHAKE_THREADS);
 
     Server(int eventSourcePort, int clientPort) {
         this.eventSourcePort = eventSourcePort;
@@ -29,20 +29,20 @@ public class Server {
     }
 
     public void run() throws IOException {
-        newEventProcessorThread();
+        newEventDispatcherThread();
         acceptEventSourceConnection();
         acceptClientConnections();
     }
 
-    private void newEventProcessorThread() {
-        eventProcessorWorker.submit(eventProcessor);
+    private void newEventDispatcherThread() {
+        eventDispatcherWorker.submit(eventDispatcher);
     }
 
     private void acceptEventSourceConnection() throws IOException {
         auditLogger.info("Listening event source connection on port " + eventSourcePort);
         try (ServerSocket server = new ServerSocket(eventSourcePort)) {
             Socket connection = server.accept();
-            eventListenerWorker.submit(new EventListener(connection, eventProcessor));
+            eventReceiverWorker.submit(new EventReceiver(connection, eventDispatcher));
         }
     }
 
@@ -51,7 +51,7 @@ public class Server {
         try (ServerSocket server = new ServerSocket(this.clientPort)) {
             while (true) {
                 Socket connection = server.accept();
-                clientListenerWorker.submit(new ClientListener(connection, eventRouter));
+                clientHandshakeWorker.submit(new ClientHandshake(connection, eventRouter));
             }
         }
     }

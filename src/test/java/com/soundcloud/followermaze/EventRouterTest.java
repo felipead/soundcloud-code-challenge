@@ -253,7 +253,7 @@ public class EventRouterTest {
     }
 
     @Test
-    public void registersClientWithConcurrentThreads() throws InterruptedException, ExecutionException {
+    public void concurrentThreadsRegisteringClients() throws InterruptedException, ExecutionException {
         final int numberOfThreads = 100;
         final int numberOfClients = 100000;
 
